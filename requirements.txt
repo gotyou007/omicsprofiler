@@ -1,4 +1,7 @@
 altair
+seaborn
+plotly
+sklearn
 numpy
 pandas
 pydeck
