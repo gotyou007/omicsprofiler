@@ -16,6 +16,23 @@ import inspect
 import textwrap
 
 import streamlit as st
+import numpy as np 
+import pandas as pd 
+from pandas.api.types import is_numeric_dtype
+# from pandas_profiling import ProfileReport
+
+def get_data_from_excel(sheet):
+        df = pd.read_excel(
+            io="pooled_DESeq.xlsx",
+            engine="openpyxl",
+            sheet_name=sheet
+        )
+        return df
+
+def convert_df(df):
+        return df.to_csv(index=False).encode('utf-8')
+def convert_df_noindex(df):
+        return df.to_csv(index=False, header=False, sep='\t').encode('utf-8')
 
 
 def show_code(demo):
