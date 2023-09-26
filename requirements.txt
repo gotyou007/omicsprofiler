@@ -2,6 +2,7 @@ altair
 seaborn
 plotly
 sklearn
+scipy
 numpy
 pandas
 pydeck

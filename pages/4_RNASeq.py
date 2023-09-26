@@ -8,18 +8,13 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import gcf
 from matplotlib.colors import ListedColormap
 from scipy.stats import zscore
-from sklearn import cluster
-from sklearn.decomposition import PCA
-from sklearn import preprocessing
-from streamlit.hello.utils import get_data_from_excel, convert_df
-from streamlit.hello.utils import show_code
+from utils import get_data_from_excel
+from utils import show_code
 
 def volcano() -> None:
 
     # Interactive Streamlit elements, like these sliders, return their value.
     # This gives you an extremely simple interaction model.
-    iterations = st.sidebar.slider("Level of detail", 2, 20, 10, 1)
-    separation = st.sidebar.slider("Separation", 0.7, 2.0, 0.7885)
     sheet = st.text_input("select sheet", 'comb_vs_scr')
     data = get_data_from_excel(sheet)
     st.sidebar.header("Please Filter Here:")
