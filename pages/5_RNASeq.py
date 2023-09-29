@@ -44,7 +44,7 @@ def volcano() -> None:
         yaxis=(dict(showgrid=False)),
         xaxis_range=[-4,4],
     )
-    @st.cache
+    @st.cache_data 
     def convert_df(df):
         return df.to_csv().encode('utf-8')
     csv = convert_df(dif_genes)
