@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from helper_functions.date_gene import qc_df
 from helper_functions.session_state import ss
 
 from io import StringIO
@@ -51,14 +50,6 @@ class FileUploads():
                         ss.save_state({ss_excel: st.session_state[ss_excel]})
         return df_dict
     
-    def capslock_genes(self, df_dict):
-        for df in df_dict.values():
-            df.index = df.index.astype(str, copy=False) # expand to format actual dates from excel sheets as text
-            df.index = df.index.str.upper()
-
-        cleandict = qc_df(df_dict)
-
-        return cleandict
     
     def gmt_to_dict(self, add_geneset_in):
         geneset_dicts = defaultdict(dict)
