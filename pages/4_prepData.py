@@ -19,6 +19,7 @@ ss.initialise_state(state_dict = { 'file_type': 'Raw Counts',
                                     "df_excel": None,
                                     "meta_in": None,
                                     "meta_excel": None,
+                                    "meta_dict": None,
                                   })
 # ########################################################################################################################
 
@@ -44,7 +45,7 @@ elif st.session_state['demo']:
 else:
     st.session_state['df_in'] = st.session_state['df_in']
 
-# # Complicated conditions
+# #uploads conditions
 # ## 1. have files uploaded and not using demo
 # ## 2. no files uploaded and using demo
 # ## 3. have files uploaded and using demo
