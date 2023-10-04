@@ -1,13 +1,10 @@
 import os
 import streamlit as st
-import pickle as pkl
 from helper_functions.uploads import fileuploads
 from helper_functions.session_state import ss
 import pandas as pd
 
-from pydeseq2.dds import DeseqDataSet
-from pydeseq2.ds import DeseqStats
-from utils import convert_df
+
 # ###################################################### SESSION STATES ##################################################
 st.session_state.update(st.session_state)
 ss.initialise_state(state_dict = { 'file_type': 'Raw Counts',
@@ -56,6 +53,8 @@ if (st.session_state['df_in'] is not None) and (not st.session_state['demo']):
     #cleandict = fileuploads.capslock_genes(cleandict)
 
     if file_type == "DeSeq2 Results":
+            #the assumption is that the user has completed preprocessing(Deseq2 or Limma)
+            #and has the results of the contrast of interest(contrast of interest and p-values)
             ss.save_state({'Deseq2_dict':cleandict})
     else:
         with file_opts:
@@ -105,7 +104,8 @@ if view_df is True:
     if metadatadict is not None:
         for k,v in metadatadict.items():
             meta_expr.subheader(k)
-            meta_expr.dataframe(v)
+            meta_expr = meta_expr.data_editor(v)#testing editing function
+            metadatadict[k] = meta_expr
     else:
         meta_expr.info("No metadata uploaded")
 
@@ -116,56 +116,6 @@ if view_df is True:
     else:
         Deseq2_expr.info("No ratios and p-values uploaded")
 
-        
-
-
-
-
-
-
-uploaded_counts = st.file_uploader("Choose a raw counts file")
-if uploaded_counts is not None:
-    counts_df = pd.read_csv(uploaded_counts, index_col=0)
-    st.write("raw counts you put in", counts_df)
-    counts_df = counts_df.T
-    st.write("transposed it", counts_df)
-
-uploaded_meta = st.file_uploader("Choose a metadata file")
-if uploaded_meta is not None:
-    metadata = pd.read_csv(uploaded_meta, index_col=0)
-    st.write("meta data", metadata)
-#check files exist
-try:
-    st.write("check counts", counts_df)
-    st.write("check meta", metadata)
-    #filter out nans
-    samples_to_keep = ~metadata.condition.isna()
-    counts_df = counts_df.loc[samples_to_keep]
-    metadata = metadata.loc[samples_to_keep]
-    #filter out low reads genes
-    reads_cutoff = st.sidebar.slider("reads number", 5, 20, 5)
-    genes_to_keep = counts_df.columns[counts_df.sum(axis=0) >= reads_cutoff]
-    counts_df = counts_df[genes_to_keep]
-    st.write("now you have", counts_df)
-
-    dds = DeseqDataSet(
-        counts=counts_df,
-        metadata=metadata,
-        design_factors="condition",
-        refit_cooks=True,
-        n_cpus=8,
-    )
-
-    dds.deseq2()
-    st.write(dds)
-
-    stat_res = DeseqStats(dds, n_cpus=8)
-    stat_res.summary()
-    res = convert_df(stat_res.results_df)
-    st.download_button('Download contrast CSV', res, 'text/csv')
-
-except NameError:
-    print('counts or meta does not exist')    
 
 
 

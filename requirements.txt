@@ -1,9 +1,11 @@
 altair
 seaborn
 plotly
-sklearn
+scikit-learn
 scipy
 numpy
 pandas
 pydeck
 streamlit
+pydeseq2
+openpyxl

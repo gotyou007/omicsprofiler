@@ -2,8 +2,6 @@ import streamlit as st
 import pandas as pd
 from helper_functions.session_state import ss
 
-from io import StringIO
-from collections import defaultdict
 
 class FileUploads():
     def read_xfile(self, df_query, ss_excel):
@@ -31,7 +29,7 @@ class FileUploads():
                 df_dict[head] = data
 
             elif tail == 'xlsx':
-                x = st.cache_data(pd.read_excel)(d, index_col=0, sheet_name=None, engine='openpyxl')
+                x = st.cache_data(pd.read_excel)(d, index_col=0, sheet_nae=None, engine='openpyxl')
                 if ss_excel == "df_excel":
                     selected_sheet = st.multiselect(label="Select which sheet to read in", options=list(x.keys()), default = st.session_state[ss_excel])
                     if len(selected_sheet) != 0:
@@ -51,16 +49,5 @@ class FileUploads():
         return df_dict
     
     
-    def gmt_to_dict(self, add_geneset_in):
-        geneset_dicts = defaultdict(dict)
-        for geneset in add_geneset_in:
-            upload_to_str = StringIO(st.session_state['add_geneset_in'][0].getvalue().decode("utf-8"))
-            fname = geneset.name
-            for line in upload_to_str.readlines():
-                break_mod = line.split("\t")
-                modname = break_mod[0]
-                genes = break_mod[2:None]
-                geneset_dicts[fname.replace(".gmt","")][modname] = genes
-        return dict(geneset_dicts)
     
 fileuploads = FileUploads()

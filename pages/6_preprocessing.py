@@ -1,7 +1,10 @@
 import streamlit as st
 from helper_functions.session_state import ss
+from helper_functions.PCA import PC_cluster
 from pydeseq2.dds import DeseqDataSet
 from pydeseq2.ds import DeseqStats
+import pydeseq2
+
 import matplotlib.pyplot as plt 
 
 st.session_state.update(st.session_state)
@@ -34,7 +37,7 @@ try:
         genes_to_keep = counts_df.columns[counts_df.sum(axis=0) >= reads_cutoff]
         counts_df = counts_df[genes_to_keep]
         st.write("now you have", counts_df)
-
+       #run deseq2
         dds = DeseqDataSet(
             counts=counts_df,
             metadata=metadata,
@@ -42,14 +45,26 @@ try:
             refit_cooks=True,
             n_cpus=8,
         )
-        dds.fit_size_factors()
-        dds.deseq2()
-        st.write(dds.varm["LFC"])
-        stat_res = DeseqStats(dds, n_cpus=8)
+        dds.deseq2() #run the deseq2() method to fit dispersions and LFCs
+        ## run stats (requires modifcation)
+        padj_cutoff = st.select_slider("padj cutoff", value=0.05, options=[0.001, 0.005, 0.01, 0.05])
+        stat_res = DeseqStats(dds, n_cpus=8, alpha=padj_cutoff, contrast=st.session_state['contrast'])
+        #########
+        deseq2_counts, _ = pydeseq2.preprocessing.deseq2_norm(counts_df)
+        ##PCA
+        
+        df_PCA = PC_cluster.PC_s(deseq2_counts.T, 100, metadata)
+        selected_contrast = PC_cluster.PC_contrast(metadata)
+        ss.save_state({'contrast':selected_contrast})
+        st.write("selected contrast", st.session_state['contrast'])
+
+        ## stats
+        stat_res = DeseqStats(dds, n_cpus=8, contrast=st.session_state['contrast'])
         stat_res.summary(lfc_null=0.1, alt_hypothesis="greaterAbs")
         fig, ax = plt.subplots()
         fig = stat_res.plot_MA(s=20)
         st.pyplot(fig)
+        st.write("stat_res", stat_res)
         pass
     else:
         pass
