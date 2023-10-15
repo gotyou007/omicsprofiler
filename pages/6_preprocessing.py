@@ -1,9 +1,8 @@
 import streamlit as st
 from helper_functions.session_state import ss
 from helper_functions.PCA import PC_cluster
-from pydeseq2.dds import DeseqDataSet
-from pydeseq2.ds import DeseqStats
-import pydeseq2
+from helper_functions.DeSeq2 import Deseq2
+
 
 import matplotlib.pyplot as plt 
 
@@ -12,6 +11,8 @@ ss.initialise_state({"counts_cutoff": 0,
                      "comparisons": None,
                      "base_condition": None,
                      "contrast": None,
+                     "norm_counts": None,
+                     "res_df": None,
 })
 
 try:
@@ -28,29 +29,18 @@ try:
         st.write("counts", counts_df)
         st.write("metadata", metadata)
 
-        #filter out nans
-        samples_to_keep = ~metadata.condition.isna()
-        counts_df = counts_df.loc[samples_to_keep]
-        metadata = metadata.loc[samples_to_keep]
         #filter out low reads genes
         reads_cutoff = prep_exp.slider("reads number", 5, 20, 5)
+        padj_cutoff = st.select_slider("padj cutoff", value=0.05, options=[0.001, 0.005, 0.01, 0.05])
         genes_to_keep = counts_df.columns[counts_df.sum(axis=0) >= reads_cutoff]
         counts_df = counts_df[genes_to_keep]
         st.write("now you have", counts_df)
-       #run deseq2
-        dds = DeseqDataSet(
-            counts=counts_df,
-            metadata=metadata,
-            design_factors="condition",
-            refit_cooks=True,
-            n_cpus=8,
-        )
-        dds.deseq2() #run the deseq2() method to fit dispersions and LFCs
-        ## run stats (requires modifcation)
-        padj_cutoff = st.select_slider("padj cutoff", value=0.05, options=[0.001, 0.005, 0.01, 0.05])
-        stat_res = DeseqStats(dds, n_cpus=8, alpha=padj_cutoff, contrast=st.session_state['contrast'])
-        #########
-        deseq2_counts, _ = pydeseq2.preprocessing.deseq2_norm(counts_df)
+        #run deseq2
+        dds = Deseq2(counts_df, metadata, reads_cutoff, 0.05, st.session_state['contrast'])
+        #1. run the deseq2() method to fit dispersions and LFCs and return, 
+        #2. run stats and return results_df,normalized counts
+        res_df, deseq2_counts = dds.run_deseq2() 
+        
         ##PCA
         
         df_PCA = PC_cluster.PC_s(deseq2_counts.T, 100, metadata)
@@ -58,13 +48,8 @@ try:
         ss.save_state({'contrast':selected_contrast})
         st.write("selected contrast", st.session_state['contrast'])
 
-        ## stats
-        stat_res = DeseqStats(dds, n_cpus=8, contrast=st.session_state['contrast'])
-        stat_res.summary(lfc_null=0.1, alt_hypothesis="greaterAbs")
-        fig, ax = plt.subplots()
-        fig = stat_res.plot_MA(s=20)
-        st.pyplot(fig)
-        st.write("stat_res", stat_res)
+       
+        st.write("stat_res", res_df)
         pass
     else:
         pass

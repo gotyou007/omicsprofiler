@@ -29,7 +29,7 @@ class FileUploads():
                 df_dict[head] = data
 
             elif tail == 'xlsx':
-                x = st.cache_data(pd.read_excel)(d, index_col=0, sheet_nae=None, engine='openpyxl')
+                x = st.cache_data(pd.read_excel)(d, index_col=0, sheet_name=None, engine='openpyxl')
                 if ss_excel == "df_excel":
                     selected_sheet = st.multiselect(label="Select which sheet to read in", options=list(x.keys()), default = st.session_state[ss_excel])
                     if len(selected_sheet) != 0:
