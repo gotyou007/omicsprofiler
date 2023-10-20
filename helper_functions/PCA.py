@@ -61,12 +61,19 @@ class PCana():
         #PCA table
         return df_PCA
     def PC_contrast(_self, metadata):
-        condition_list = metadata.condition.unique()
-        selected_baseline = st.selectbox(label="Select baseline condition",
-                                           options=list(condition_list))
-        selected_trt = st.selectbox(label="Select treated condition",
-                                           options=list(condition_list))
-        selected_contrast = ["condition", selected_baseline, selected_trt]
+        group = metadata.columns
+        selected_group = st.selectbox(label="Select a group",
+                                           options=list(group))
+        try:
+            condition_list = metadata[selected_group].unique()
+        
+            selected_baseline = st.selectbox(label="Select baseline condition",
+                                            options=list(condition_list))
+            selected_trt = st.selectbox(label="Select treated condition",
+                                            options=list(condition_list))
+            selected_contrast = [selected_group, selected_baseline, selected_trt]
+        except KeyError:
+            st.write("Please select a group")
         return selected_contrast
     
 PC_cluster = PCana()

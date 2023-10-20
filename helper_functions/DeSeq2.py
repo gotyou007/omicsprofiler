@@ -24,6 +24,14 @@ class Deseq2():
         self.padj_cutoff = padj_cutoff
         self.contrast = contrast
 
+    def run_norm(self):
+        '''
+        this function will run deseq2 normalization
+        '''
+        deseq2_counts, _ = pydeseq2.preprocessing.deseq2_norm(self.counts_df)
+        return deseq2_counts
+
+
     def run_deseq2(self):
         #filter out nans
         samples_to_keep = ~self.metadata.condition.isna()
@@ -36,7 +44,7 @@ class Deseq2():
         dds = pydeseq2.dds.DeseqDataSet(
             counts=self.counts_df,
             metadata=self.metadata,
-            design_factors="condition",
+            design_factors=self.contrast[0],
             refit_cooks=True,
             n_cpus=8,
         )
@@ -48,7 +56,6 @@ class Deseq2():
         stat_res.summary()
         res_df = stat_res.results_df
         
-        deseq2_counts, _ = pydeseq2.preprocessing.deseq2_norm(self.counts_df)
-        return res_df, deseq2_counts
+        return res_df
 
         #########
