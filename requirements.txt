@@ -1,11 +1,9 @@
-altair
 seaborn
 plotly
 scikit-learn
 scipy
 numpy
 pandas
-pydeck
 streamlit
 pydeseq2
 openpyxl
